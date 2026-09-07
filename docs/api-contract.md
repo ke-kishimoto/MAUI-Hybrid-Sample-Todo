@@ -22,10 +22,11 @@
 | --- | --- | --- |
 | `GET` | `/todos` | 未削除 TODO の一覧取得 |
 | `GET` | `/todos/{id}` | TODO の取得 |
-| `PUT` | `/todos/{id}` | 作成または全項目更新。リクエスト本文の `version` を検証する |
+| `POST` | `/todos` | 新規 TODO の登録。`id`（クライアント生成 UUID）と `title` を受け取る |
+| `PUT` | `/todos/{id}` | 全項目更新。リクエスト本文の `version` を検証する（未実装） |
 | `DELETE` | `/todos/{id}` | 論理削除 |
 
-`PUT` と `DELETE` には再送判定用の `Idempotency-Key` ヘッダーを必須にする案です。競合時は `409 Conflict`、入力不正時は `400 Bad Request` を返します。
+`POST` の成功時は `201 Created`、作成した TODO と `Location` ヘッダーを返します。`PUT` と `DELETE` には再送判定用の `Idempotency-Key` ヘッダーを必須にする案です。競合時は `409 Conflict`、入力不正時は `400 Bad Request` を返します。
 
 ## 同期
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO 一覧</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="page-content">
+    <section class="todo-card" aria-labelledby="page-title">
+        <div class="page-heading">
+            <div>
+                <h1 id="page-title">TODO 一覧</h1>
+                <p class="description">登録済みの TODO を表示しています。</p>
+            </div>
+            <a class="button-link" th:href="@{/todos/new}">新規登録</a>
+        </div>
+
+        <p class="empty-message" th:if="${#lists.isEmpty(todos)}">登録されている TODO はありません。</p>
+
+        <ul class="todo-list" th:unless="${#lists.isEmpty(todos)}">
+            <li th:each="todo : ${todos}" class="todo-list-item">
+                <span class="todo-status" th:text="${todo.completed ? '完了' : '未完了'}"></span>
+                <span class="todo-title" th:text="${todo.title}"></span>
+            </li>
+        </ul>
+    </section>
+</main>
+</body>
+</html>
