@@ -1,0 +1,25 @@
+# .NET / MAUI
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+
+# Java / Spring Boot
+target/
+.gradle/
+build/
+.idea/
+*.iml
+
+# Local configuration and databases
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+Thumbs.db
