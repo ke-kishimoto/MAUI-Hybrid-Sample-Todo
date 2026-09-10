@@ -1,5 +1,186 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+@using System.ComponentModel.DataAnnotations
+@inject LocalTodoService LocalTodos
+@inject TodoSyncService SyncService
 
-Welcome to your new app.
+<PageTitle>TODO</PageTitle>
+
+<div class="todo-page">
+    <header class="page-heading">
+        <div>
+            <p class="eyebrow">OFFLINE FIRST</p>
+            <h1>TODO</h1>
+            <p class="lead">入力内容は最初にこの端末へ保存されます。</p>
+        </div>
+        <div class="sync-panel">
+            <span class="pending-count">未同期 @pendingCount 件</span>
+            <button class="btn btn-outline-primary" type="button"
+                    disabled="@(isBusy || pendingCount == 0)" @onclick="SyncAsync">
+                @(isSyncing ? "同期中…" : "今すぐ同期")
+            </button>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <div class="alert @statusStyle" role="status" aria-live="polite">@statusMessage</div>
+    }
+
+    <section class="todo-card" aria-labelledby="create-heading">
+        <h2 id="create-heading">新しいTODO</h2>
+        <EditForm Model="form" OnValidSubmit="CreateAsync">
+            <DataAnnotationsValidator />
+            <div class="create-row">
+                <div class="title-field">
+                    <label for="todo-title">タイトル</label>
+                    <InputText id="todo-title" class="form-control" maxlength="200"
+                               placeholder="例：牛乳を買う" disabled="@isBusy"
+                               @bind-Value="form.Title" />
+                    <ValidationMessage For="@(() => form.Title)" />
+                </div>
+                <button class="btn btn-primary create-button" type="submit" disabled="@isBusy">
+                    @(isCreating ? "保存中…" : "端末に保存")
+                </button>
+            </div>
+        </EditForm>
+    </section>
+
+    <section class="todo-card" aria-labelledby="list-heading">
+        <div class="list-heading-row">
+            <h2 id="list-heading">この端末のTODO</h2>
+            <span>@todos.Count 件</span>
+        </div>
+
+        @if (isLoading)
+        {
+            <p class="empty-message">読み込み中…</p>
+        }
+        else if (todos.Count == 0)
+        {
+            <p class="empty-message">まだTODOはありません。</p>
+        }
+        else
+        {
+            <ul class="todo-list">
+                @foreach (var todo in todos)
+                {
+                    <li class="todo-list-item">
+                        <div class="todo-main">
+                            <span class="completion-dot @(todo.IsCompleted ? "completed" : null)" aria-hidden="true"></span>
+                            <div>
+                                <p class="todo-title">@todo.Title</p>
+                                <p class="todo-date">@todo.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</p>
+                            </div>
+                        </div>
+                        <span class="sync-badge @(todo.IsPendingSync ? "pending" : "synced")">
+                            @(todo.IsPendingSync ? "未同期" : "同期済み")
+                        </span>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>
+
+@code {
+    private readonly CreateTodoForm form = new();
+    private IReadOnlyList<LocalTodoListItem> todos = [];
+    private int pendingCount;
+    private bool isLoading = true;
+    private bool isCreating;
+    private bool isSyncing;
+    private string? statusMessage;
+    private string statusStyle = "alert-info";
+    private bool isBusy => isLoading || isCreating || isSyncing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await RefreshAsync();
+        }
+        catch (Exception exception)
+        {
+            ShowError($"ローカルデータを読み込めませんでした: {exception.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        isCreating = true;
+        statusMessage = null;
+        try
+        {
+            await LocalTodos.CreateAsync(form.Title);
+            form.Title = string.Empty;
+            await RefreshAsync();
+            ShowSuccess("TODOをこの端末に保存しました。ネットワーク接続は不要です。");
+        }
+        catch (Exception exception)
+        {
+            ShowError($"TODOを保存できませんでした: {exception.Message}");
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
+    private async Task SyncAsync()
+    {
+        isSyncing = true;
+        statusMessage = null;
+        try
+        {
+            var result = await SyncService.SyncAsync();
+            await RefreshAsync();
+            if (result.FailedCount == 0)
+            {
+                ShowSuccess($"{result.SucceededCount}件のTODOを同期しました。");
+            }
+            else
+            {
+                statusStyle = "alert-warning";
+                statusMessage = $"{result.SucceededCount}件を同期し、{result.FailedCount}件は未同期のまま保持しました。backendの起動状態を確認してください。";
+            }
+        }
+        catch (Exception exception)
+        {
+            ShowError($"同期を実行できませんでした: {exception.Message}");
+        }
+        finally
+        {
+            isSyncing = false;
+        }
+    }
+
+    private async Task RefreshAsync()
+    {
+        todos = await LocalTodos.GetAllAsync();
+        pendingCount = await LocalTodos.GetPendingCountAsync();
+    }
+
+    private void ShowSuccess(string message)
+    {
+        statusStyle = "alert-success";
+        statusMessage = message;
+    }
+
+    private void ShowError(string message)
+    {
+        statusStyle = "alert-danger";
+        statusMessage = message;
+    }
+
+    private sealed class CreateTodoForm
+    {
+        [Required(ErrorMessage = "タイトルを入力してください。")]
+        [StringLength(200, MinimumLength = 1, ErrorMessage = "タイトルは200文字以内で入力してください。")]
+        public string Title { get; set; } = string.Empty;
+    }
+}

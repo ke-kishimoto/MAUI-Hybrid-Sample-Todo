@@ -18,6 +18,22 @@ public static class MauiProgram
 
 		builder.Services.AddMauiBlazorWebView();
 		builder.Services.AddSingleton<SqliteDatabase>();
+		builder.Services.AddSingleton<LocalTodoService>();
+		builder.Services.AddSingleton(_ =>
+		{
+			var configuredUrl = Environment.GetEnvironmentVariable("TODO_API_BASE_URL");
+			var baseUrl = string.IsNullOrWhiteSpace(configuredUrl)
+				? "http://localhost:8080/api/v1/"
+				: configuredUrl.Trim().TrimEnd('/') + "/";
+
+			return new HttpClient
+			{
+				BaseAddress = new Uri(baseUrl, UriKind.Absolute),
+				Timeout = TimeSpan.FromSeconds(15),
+			};
+		});
+		builder.Services.AddSingleton<Sync.TodoApiClient>();
+		builder.Services.AddSingleton<Sync.TodoSyncService>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

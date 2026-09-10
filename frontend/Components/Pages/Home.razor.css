@@ -1,0 +1,31 @@
+.todo-page { max-width: 920px; margin: 0 auto; padding-bottom: 3rem; }
+.page-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; margin: 1.25rem 0 1.5rem; }
+.eyebrow { margin: 0 0 .25rem; color: #5b5bd6; font-size: .75rem; font-weight: 700; letter-spacing: .16em; }
+.page-heading h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.25rem); font-weight: 750; letter-spacing: -.04em; }
+.lead { margin: .4rem 0 0; color: #64748b; font-size: 1rem; }
+.sync-panel { display: flex; align-items: center; gap: .75rem; padding-bottom: .35rem; }
+.pending-count { color: #475569; font-size: .9rem; white-space: nowrap; }
+.todo-card { margin-bottom: 1rem; padding: 1.35rem; border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; box-shadow: 0 6px 24px rgba(15, 23, 42, .05); }
+.todo-card h2 { margin: 0 0 1rem; color: #1e293b; font-size: 1.05rem; }
+.create-row { display: flex; align-items: flex-start; gap: .75rem; }
+.title-field { flex: 1; }
+.title-field label { display: block; margin-bottom: .35rem; color: #475569; font-size: .85rem; font-weight: 600; }
+.create-button { margin-top: 1.62rem; white-space: nowrap; }
+.list-heading-row { display: flex; justify-content: space-between; color: #64748b; }
+.todo-list { margin: 0; padding: 0; list-style: none; }
+.todo-list-item { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .9rem 0; border-top: 1px solid #eef2f7; }
+.todo-main { display: flex; align-items: center; gap: .8rem; min-width: 0; }
+.completion-dot { flex: 0 0 18px; width: 18px; height: 18px; border: 2px solid #94a3b8; border-radius: 50%; }
+.completion-dot.completed { border-color: #16a34a; background: #16a34a; }
+.todo-title { margin: 0; overflow-wrap: anywhere; color: #172033; font-weight: 600; }
+.todo-date { margin: .15rem 0 0; color: #94a3b8; font-size: .78rem; }
+.sync-badge { flex: 0 0 auto; padding: .25rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 700; }
+.sync-badge.pending { color: #92400e; background: #fef3c7; }
+.sync-badge.synced { color: #166534; background: #dcfce7; }
+.empty-message { margin: 0; padding: 1.5rem 0; color: #64748b; text-align: center; }
+
+@media (max-width: 640px) {
+    .page-heading, .create-row { align-items: stretch; flex-direction: column; gap: 1rem; }
+    .sync-panel { justify-content: space-between; }
+    .create-button { margin-top: 0; }
+}
